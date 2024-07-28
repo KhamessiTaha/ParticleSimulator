@@ -18,4 +18,4 @@ Welcome to the Particle Simulator project! This simulator is designed to create 
 ### Installation
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/yourusername/ParticleSimulator.git
+   git clone https://github.com/KhamessiTaha/ParticleSimulator.git
