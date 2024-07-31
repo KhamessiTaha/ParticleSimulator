@@ -4,8 +4,8 @@ from elements import ElementType
 
 class ParticleMenu:
     def __init__(self):
-        self.width = 200
-        self.height = 200
+        self.width = 500
+        self.height = 500
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("Particle Type Menu")
 
@@ -15,6 +15,8 @@ class ParticleMenu:
             "Powder": (50, 60, ElementType.POWDER),
             "Water": (50, 100, ElementType.WATER),
             "Fire": (50, 140, ElementType.FIRE),
+            "Sand": (50, 260, ElementType.SAND),  # New element button
+            "Metal": (50, 300, ElementType.METAL), # New element button
         }
 
     def draw_buttons(self):
@@ -34,7 +36,7 @@ class ParticleMenu:
         return None
 
 def open_particle_menu():
-    menu_width, menu_height = 200, 200
+    menu_width, menu_height = 500, 500
     menu_screen = pygame.display.set_mode((menu_width, menu_height))
     pygame.display.set_caption("Particle Type Menu")
     font = pygame.font.Font(None, 36)

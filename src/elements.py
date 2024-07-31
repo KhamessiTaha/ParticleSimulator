@@ -1,4 +1,3 @@
-# src/elements.py
 from enum import Enum
 
 class ElementType(Enum):
@@ -15,7 +14,6 @@ class Element:
         self.color = color
         self.flammable = flammable
 
-# Define some elements
 ELEMENTS = {
     ElementType.EMPTY: Element(ElementType.EMPTY, (255, 255, 255)),
     ElementType.POWDER: Element(ElementType.POWDER, (128, 128, 128)),
