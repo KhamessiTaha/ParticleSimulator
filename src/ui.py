@@ -6,7 +6,7 @@ from physics import Grid
 pygame.init()
 
 WIDTH, HEIGHT = 800, 600
-CELL_SIZE = 2  # Smaller cell size for smaller particles
+CELL_SIZE = 2  
 GRID_WIDTH = WIDTH // CELL_SIZE
 GRID_HEIGHT = HEIGHT // CELL_SIZE
 screen = pygame.display.set_mode((WIDTH, HEIGHT))

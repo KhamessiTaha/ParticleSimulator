@@ -1,0 +1,23 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #575757;
+}
+
+#toolbar {
+    margin-bottom: 10px;
+}
+
+canvas {
+    border: 1px solid black;
+}
+#colorIndicator {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    margin-left: 10px;
+    border: 1px solid #000;
+}

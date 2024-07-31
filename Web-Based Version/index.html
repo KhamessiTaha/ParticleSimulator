@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParticleSimulator by Taha</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="toolbar">
+        <button onclick="selectType('sand')">Sand</button>
+        <button onclick="selectType('water')">Water</button>
+        <button onclick="selectType('fire')">Fire</button>
+        <button onclick="selectType('oil')">Oil</button>
+        <button onclick="selectType('wall')">Wall</button>
+        <button onclick="selectType('acid')">Acid</button>
+        <button onclick="selectType('gas')">Gas</button>
+        <button onclick="startSimulation()">Start</button>
+        <button onclick="pauseSimulation()">Pause</button>
+        <button onclick="resetSimulation()">Reset</button>
+        <button onclick="clearSimulation()">Clear</button>
+        <div id="colorIndicator"></div>
+    </div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script src="app.js"></script>
+</body>
+</html>
