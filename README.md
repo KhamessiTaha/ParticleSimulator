@@ -1,21 +1,39 @@
 # Particle Simulator
 
-## Overview
-Welcome to the Particle Simulator project! This simulator is designed to create and visualize complex particle systems governed by real physics. It supports various states of matter including powder, liquid, solid, and gas, and allows for the simulation of phenomena such as explosions, nuclear reactions, fusion, fission, and particle collisions.
+A particle simulation game with various elements such as powder, water, fire, steam, and wood. Users can create particles and interact with them in a physics-based environment.
 
 ## Features
-- **Particle Dynamics**: Simulate individual particle motion with accurate physics.
-- **State Transitions**: Model transitions between different states of matter.
-- **Interactions**: Implement interactions between particles, including collisions and forces.
-- **Explosions and Reactions**: Simulate explosive reactions and nuclear processes.
-- **Visualization**: Visualize the particle systems in 2D with clear and informative graphics.
 
-## Getting Started
-### Prerequisites
-- Python 3.6+
-- `numpy` and `matplotlib` packages
+- Powder, Water, Fire, Steam, and Wood elements
+- Physics-based interactions
+- Element creation through a user interface
 
-### Installation
-1. **Clone the Repository:**
-   ```bash
-   git clone https://github.com/KhamessiTaha/ParticleSimulator.git
+## Requirements
+
+- Python 3.7+
+- Pygame
+- NumPy
+
+## Installation
+
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/yourusername/ParticleSimulator.git
+    cd ParticleSimulator
+    ```
+
+2. Install dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3. Run the application:
+    ```bash
+    python src/ui.py
+    ```
+
+## Building the Executable
+
+To build the application as a standalone executable, run:
+```bash
+pyinstaller --name ParticleSimulator --onefile src/ui.py
