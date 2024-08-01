@@ -5,7 +5,6 @@ const height = canvas.height;
 const particles = [];
 const grid = Array.from({ length: height }, () => Array(width).fill(null));
 
-
 const particleTypes = {
     sand: { color: 'yellow', density: 2 },
     water: { color: 'blue', density: 1 },
@@ -13,7 +12,9 @@ const particleTypes = {
     oil: { color: 'brown', density: 1 },
     wall: { color: 'gray', density: Infinity },
     acid: { color: 'green', density: 1 },
-    gas: { color: 'lightgray', density: 0 }
+    gas: { color: 'lightgray', density: 0 },
+    smoke: { color: 'darkgray', density: 0 },
+    glass: { color: 'lightblue', density: 3 }
 };
 
 class Particle {
@@ -26,13 +27,21 @@ class Particle {
     }
 
     update() {
-        if (this.type === 'sand' || this.type === 'water' || this.type === 'oil' || this.type === 'acid') {
-            this.fall();
-        } else if (this.type === 'fire') {
-            this.spread();
-            this.burn();
-        } else if (this.type === 'gas') {
-            this.rise();
+        switch (this.type) {
+            case 'sand':
+            case 'water':
+            case 'oil':
+            case 'acid':
+                this.fall();
+                break;
+            case 'fire':
+                this.spread();
+                this.burn();
+                break;
+            case 'gas':
+            case 'smoke':
+                this.rise();
+                break;
         }
     }
 
@@ -41,6 +50,8 @@ class Particle {
             grid[this.y][this.x] = null;
             this.y += 1;
             grid[this.y][this.x] = this;
+        } else {
+            this.disperse();
         }
     }
 
@@ -49,6 +60,35 @@ class Particle {
             grid[this.y][this.x] = null;
             this.y -= 1;
             grid[this.y][this.x] = this;
+        } else if (this.type === 'smoke') {
+            this.disperse();
+        }
+    }
+
+    disperse() {
+        const disperseDirections = this.type === 'smoke' ? [
+            { dx: 1, dy: 0 },  // right
+            { dx: -1, dy: 0 }, // left
+            { dx: 0, dy: -1 }  // up
+        ] : [
+            { dx: 1, dy: 0 },  // right
+            { dx: -1, dy: 0 }, // left
+            { dx: 0, dy: 1 }   // down
+        ];
+
+        for (let dir of disperseDirections) {
+            const newX = this.x + dir.dx;
+            const newY = this.y + dir.dy;
+            if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
+                const neighbor = grid[newY][newX];
+                if (!neighbor || (neighbor && neighbor.density < this.density)) {
+                    grid[this.y][this.x] = null;
+                    this.x = newX;
+                    this.y = newY;
+                    grid[this.y][this.x] = this;
+                    break;
+                }
+            }
         }
     }
 
@@ -65,18 +105,34 @@ class Particle {
             const newY = this.y + dir.dy;
             if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
                 const neighbor = grid[newY][newX];
-                if (neighbor && neighbor.type === 'oil') {
-                    grid[newY][newX] = new Particle(newX, newY, 'fire');
-                    particles.push(grid[newY][newX]);
+                if (neighbor) {
+                    if (neighbor.type === 'oil') {
+                        grid[newY][newX] = new Particle(newX, newY, 'fire');
+                        particles.push(grid[newY][newX]);
+                    } else if (neighbor.type === 'sand') {
+                        grid[newY][newX] = new Particle(newX, newY, 'glass');
+                        particles.push(grid[newY][newX]);
+                    }
                 }
             }
         }
     }
 
     burn() {
-        if (this.y < height - 1 && grid[this.y + 1][this.x] && grid[this.y + 1][this.x].type === 'oil') {
-            grid[this.y + 1][this.x] = new Particle(this.x, this.y + 1, 'fire');
-            particles.push(grid[this.y + 1][this.x]);
+        if (this.y < height - 1) {
+            const below = grid[this.y + 1][this.x];
+            if (below) {
+                if (below.type === 'oil') {
+                    grid[this.y + 1][this.x] = new Particle(this.x, this.y + 1, 'fire');
+                    particles.push(grid[this.y + 1][this.x]);
+                } else if (below.type === 'sand') {
+                    grid[this.y + 1][this.x] = new Particle(this.x, this.y + 1, 'glass');
+                    particles.push(grid[this.y + 1][this.x]);
+                } else if (below.type === 'water') {
+                    grid[this.y + 1][this.x] = new Particle(this.x, this.y + 1, 'steam');
+                    particles.push(grid[this.y + 1][this.x]);
+                }
+            }
         }
     }
 
@@ -134,7 +190,6 @@ function selectType(type) {
     document.getElementById('colorIndicator').style.backgroundColor = particleTypes[type].color;
 }
 
-
 document.getElementById('colorIndicator').style.backgroundColor = particleTypes[selectedType].color;
 
 let simulationRunning = true;
@@ -158,14 +213,39 @@ function resetSimulation() {
 
 function clearSimulation() {
     resetSimulation();
-    ctx.clearRect(0, 0, width, height);
+}
+
+function saveState() {
+    localStorage.setItem('particles', JSON.stringify(particles));
+}
+
+function loadState() {
+    resetSimulation();
+    const savedParticles = JSON.parse(localStorage.getItem('particles'));
+    if (savedParticles) {
+        savedParticles.forEach(p => {
+            const particle = new Particle(p.x, p.y, p.type);
+            particles.push(particle);
+            grid[p.y][p.x] = particle;
+        });
+    }
+}
+
+let simulationSpeed = 1;
+
+function setSimulationSpeed(speed) {
+    simulationSpeed = speed;
 }
 
 function gameLoop() {
     if (simulationRunning) {
         ctx.clearRect(0, 0, width, height);
+        for (let i = 0; i < simulationSpeed; i++) {
+            particles.forEach(particle => {
+                particle.update();
+            });
+        }
         particles.forEach(particle => {
-            particle.update();
             particle.draw();
         });
     }

@@ -3,8 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ParticleSimulator by Taha</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Particle Simulation</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+        #toolbar {
+            margin-bottom: 10px;
+        }
+        #colorIndicator {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+    </style>
 </head>
 <body>
     <div id="toolbar">
@@ -15,11 +28,16 @@
         <button onclick="selectType('wall')">Wall</button>
         <button onclick="selectType('acid')">Acid</button>
         <button onclick="selectType('gas')">Gas</button>
+        <button onclick="selectType('smoke')">Smoke</button>
+        <button onclick="selectType('glass')">Glass</button>
+        <div id="colorIndicator"></div>
         <button onclick="startSimulation()">Start</button>
         <button onclick="pauseSimulation()">Pause</button>
-        <button onclick="resetSimulation()">Reset</button>
         <button onclick="clearSimulation()">Clear</button>
-        <div id="colorIndicator"></div>
+        <button onclick="saveState()">Save</button>
+        <button onclick="loadState()">Load</button>
+        <label for="speedControl">Speed:</label>
+        <input type="range" id="speedControl" min="1" max="10" value="1" oninput="setSimulationSpeed(this.value)">
     </div>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <script src="app.js"></script>
