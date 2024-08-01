@@ -14,7 +14,7 @@ const particleTypes = {
     acid: { color: 'green', density: 1 },
     gas: { color: 'lightgray', density: 0 },
     smoke: { color: 'darkgray', density: 0 },
-    glass: { color: 'lightblue', density: 3 }
+    glass: { color: 'lightblue', density: 2 }
 };
 
 class Particle {
@@ -29,6 +29,8 @@ class Particle {
     update() {
         switch (this.type) {
             case 'sand':
+                this.rigidFall();
+                break;
             case 'water':
             case 'oil':
             case 'acid':
@@ -42,6 +44,24 @@ class Particle {
             case 'smoke':
                 this.rise();
                 break;
+        }
+    }
+
+    rigidFall() {
+        if (this.y < height - 1 && (!grid[this.y + 1][this.x] || grid[this.y + 1][this.x].density < this.density)) {
+            grid[this.y][this.x] = null;
+            this.y += 1;
+            grid[this.y][this.x] = this;
+        } else if (this.y < height - 1 && this.x > 0 && (!grid[this.y + 1][this.x - 1] || grid[this.y + 1][this.x - 1].density < this.density)) {
+            grid[this.y][this.x] = null;
+            this.y += 1;
+            this.x -= 1;
+            grid[this.y][this.x] = this;
+        } else if (this.y < height - 1 && this.x < width - 1 && (!grid[this.y + 1][this.x + 1] || grid[this.y + 1][this.x + 1].density < this.density)) {
+            grid[this.y][this.x] = null;
+            this.y += 1;
+            this.x += 1;
+            grid[this.y][this.x] = this;
         }
     }
 
