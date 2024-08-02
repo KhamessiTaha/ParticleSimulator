@@ -170,23 +170,20 @@ class Particle {
 
     flicker() {
         const flickerDirections = [
+            { dx: 0, dy: -1 },
             { dx: 1, dy: 0 },
-            { dx: -1, dy: 0 },
             { dx: 0, dy: 1 },
-            { dx: 0, dy: -1 }
+            { dx: -1, dy: 0 }
         ];
 
-        const dir = flickerDirections[Math.floor(Math.random() * flickerDirections.length)];
-        const newX = this.x + dir.dx;
-        const newY = this.y + dir.dy;
-        if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
-            const neighbor = grid[newY][newX];
-            if (!neighbor || (neighbor && neighbor.density < this.density)) {
-                grid[this.y][this.x] = null;
-                this.x = newX;
-                this.y = newY;
-                grid[this.y][this.x] = this;
-            }
+        const direction = flickerDirections[Math.floor(Math.random() * flickerDirections.length)];
+        const newX = this.x + direction.dx;
+        const newY = this.y + direction.dy;
+        if (newX >= 0 && newX < width && newY >= 0 && newY < height && (!grid[newY][newX] || grid[newY][newX].density < this.density)) {
+            grid[this.y][this.x] = null;
+            this.x = newX;
+            this.y = newY;
+            grid[this.y][this.x] = this;
         }
     }
 
@@ -266,7 +263,7 @@ function pauseSimulation() {
     simulationRunning = false;
 }
 
-function resetSimulation() {
+function clearSimulation() {
     particles.length = 0;
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
@@ -275,16 +272,12 @@ function resetSimulation() {
     }
 }
 
-function clearSimulation() {
-    resetSimulation();
-}
-
 function saveState() {
     localStorage.setItem('particles', JSON.stringify(particles));
 }
 
 function loadState() {
-    resetSimulation();
+    clearSimulation();
     const savedParticles = JSON.parse(localStorage.getItem('particles'));
     if (savedParticles) {
         savedParticles.forEach(p => {
