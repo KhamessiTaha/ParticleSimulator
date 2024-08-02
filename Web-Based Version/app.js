@@ -3,7 +3,8 @@ const ctx = canvas.getContext('2d');
 const width = canvas.width;
 const height = canvas.height;
 
-const grid = Array.from({ length: height }, () => Array.from({ length: width }, () => null));
+const particleSize = 3; // Increase the size of the particles
+const grid = Array.from({ length: Math.ceil(height / particleSize) }, () => Array.from({ length: Math.ceil(width / particleSize) }, () => null));
 const particles = [];
 
 const particleTypes = {
@@ -60,7 +61,7 @@ class Particle {
     }
 
     fall() {
-        if (this.y < height - 1 && (!grid[this.y + 1][this.x] || grid[this.y + 1][this.x].density < this.density)) {
+        if (this.y < height / particleSize - 1 && (!grid[this.y + 1][this.x] || grid[this.y + 1][this.x].density < this.density)) {
             grid[this.y][this.x] = null;
             this.y += 1;
             grid[this.y][this.x] = this;
@@ -70,7 +71,7 @@ class Particle {
     }
 
     fallSand() {
-        if (this.y < height - 1 && (!grid[this.y + 1][this.x] || grid[this.y + 1][this.x].density < this.density)) {
+        if (this.y < height / particleSize - 1 && (!grid[this.y + 1][this.x] || grid[this.y + 1][this.x].density < this.density)) {
             grid[this.y][this.x] = null;
             this.y += 1;
             grid[this.y][this.x] = this;
@@ -101,7 +102,7 @@ class Particle {
         for (let dir of disperseDirections) {
             const newX = this.x + dir.dx;
             const newY = this.y + dir.dy;
-            if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
+            if (newX >= 0 && newX < width / particleSize && newY >= 0 && newY < height / particleSize) {
                 const neighbor = grid[newY][newX];
                 if (!neighbor || (neighbor && neighbor.density < this.density)) {
                     grid[this.y][this.x] = null;
@@ -125,7 +126,7 @@ class Particle {
         for (let dir of spreadDirections) {
             const newX = this.x + dir.dx;
             const newY = this.y + dir.dy;
-            if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
+            if (newX >= 0 && newX < width / particleSize && newY >= 0 && newY < height / particleSize) {
                 const neighbor = grid[newY][newX];
                 if (neighbor && (neighbor.type === 'oil' || neighbor.type === 'wood')) {
                     grid[newY][newX] = new Particle(newX, newY, 'fire');
@@ -146,7 +147,7 @@ class Particle {
         for (let dir of burnDirections) {
             const newX = this.x + dir.dx;
             const newY = this.y + dir.dy;
-            if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
+            if (newX >= 0 && newX < width / particleSize && newY >= 0 && newY < height / particleSize) {
                 const neighbor = grid[newY][newX];
                 if (neighbor) {
                     switch (neighbor.type) {
@@ -179,7 +180,7 @@ class Particle {
         const direction = flickerDirections[Math.floor(Math.random() * flickerDirections.length)];
         const newX = this.x + direction.dx;
         const newY = this.y + direction.dy;
-        if (newX >= 0 && newX < width && newY >= 0 && newY < height && (!grid[newY][newX] || grid[newY][newX].density < this.density)) {
+        if (newX >= 0 && newX < width / particleSize && newY >= 0 && newY < height / particleSize && (!grid[newY][newX] || grid[newY][newX].density < this.density)) {
             grid[this.y][this.x] = null;
             this.x = newX;
             this.y = newY;
@@ -199,15 +200,17 @@ class Particle {
 
     draw() {
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, 1, 1);
+        ctx.fillRect(this.x * particleSize, this.y * particleSize, particleSize, particleSize);
     }
 }
 
 function addParticle(x, y, type) {
-    if (x >= 0 && x < width && y >= 0 && y < height && !grid[y][x]) {
-        const particle = new Particle(x, y, type);
+    const gridX = Math.floor(x / particleSize);
+    const gridY = Math.floor(y / particleSize);
+    if (gridX >= 0 && gridX < width / particleSize && gridY >= 0 && gridY < height / particleSize && !grid[gridY][gridX]) {
+        const particle = new Particle(gridX, gridY, type);
         particles.push(particle);
-        grid[y][x] = particle;
+        grid[gridY][gridX] = particle;
     }
 }
 
@@ -215,7 +218,7 @@ function addParticleCluster(x, y, type, size = 5) {
     for (let dx = -size; dx <= size; dx++) {
         for (let dy = -size; dy <= size; dy++) {
             if (Math.sqrt(dx * dx + dy * dy) <= size) {
-                addParticle(x + dx, y + dy, type);
+                addParticle(x + dx * particleSize, y + dy * particleSize, type);
             }
         }
     }
@@ -265,8 +268,8 @@ function pauseSimulation() {
 
 function clearSimulation() {
     particles.length = 0;
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height / particleSize; y++) {
+        for (let x = 0; x < width / particleSize; x++) {
             grid[y][x] = null;
         }
     }
