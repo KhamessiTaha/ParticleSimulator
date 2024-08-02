@@ -2,19 +2,20 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const width = canvas.width;
 const height = canvas.height;
+
+const grid = Array.from({ length: height }, () => Array.from({ length: width }, () => null));
 const particles = [];
-const grid = Array.from({ length: height }, () => Array(width).fill(null));
 
 const particleTypes = {
-    sand: { color: 'yellow', density: 2 },
-    water: { color: 'blue', density: 1 },
-    fire: { color: 'red', density: 0 },
-    oil: { color: 'brown', density: 1 },
-    wall: { color: 'gray', density: Infinity },
-    acid: { color: 'green', density: 1 },
-    gas: { color: 'lightgray', density: 0 },
-    smoke: { color: 'darkgray', density: 0 },
-    glass: { color: 'lightblue', density: 2 }
+    sand: { color: '#FFD700', density: 2 },
+    water: { color: '#1E90FF', density: 1 },
+    fire: { color: '#FF4500', density: 0.5 },
+    oil: { color: '#8B4513', density: 0.8 },
+    wall: { color: '#808080', density: 10 },
+    acid: { color: '#32CD32', density: 1 },
+    gas: { color: '#FF6347', density: 0.3 },
+    smoke: { color: '#696969', density: 0.4 },
+    glass: { color: '#ADD8E6', density: 2.5 }
 };
 
 class Particle {
@@ -24,12 +25,13 @@ class Particle {
         this.type = type;
         this.color = particleTypes[type].color;
         this.density = particleTypes[type].density;
+        this.life = this.type === 'fire' ? Math.random() * 100 + 50 : null; // Fire has a limited lifespan
     }
 
     update() {
         switch (this.type) {
             case 'sand':
-                this.rigidFall();
+                this.fallSand();
                 break;
             case 'water':
             case 'oil':
@@ -39,29 +41,15 @@ class Particle {
             case 'fire':
                 this.spread();
                 this.burn();
+                this.life -= 1;
+                if (this.life <= 0) {
+                    this.extinguish();
+                }
                 break;
             case 'gas':
             case 'smoke':
                 this.rise();
                 break;
-        }
-    }
-
-    rigidFall() {
-        if (this.y < height - 1 && (!grid[this.y + 1][this.x] || grid[this.y + 1][this.x].density < this.density)) {
-            grid[this.y][this.x] = null;
-            this.y += 1;
-            grid[this.y][this.x] = this;
-        } else if (this.y < height - 1 && this.x > 0 && (!grid[this.y + 1][this.x - 1] || grid[this.y + 1][this.x - 1].density < this.density)) {
-            grid[this.y][this.x] = null;
-            this.y += 1;
-            this.x -= 1;
-            grid[this.y][this.x] = this;
-        } else if (this.y < height - 1 && this.x < width - 1 && (!grid[this.y + 1][this.x + 1] || grid[this.y + 1][this.x + 1].density < this.density)) {
-            grid[this.y][this.x] = null;
-            this.y += 1;
-            this.x += 1;
-            grid[this.y][this.x] = this;
         }
     }
 
@@ -72,6 +60,14 @@ class Particle {
             grid[this.y][this.x] = this;
         } else {
             this.disperse();
+        }
+    }
+
+    fallSand() {
+        if (this.y < height - 1 && (!grid[this.y + 1][this.x] || grid[this.y + 1][this.x].density < this.density)) {
+            grid[this.y][this.x] = null;
+            this.y += 1;
+            grid[this.y][this.x] = this;
         }
     }
 
@@ -125,34 +121,54 @@ class Particle {
             const newY = this.y + dir.dy;
             if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
                 const neighbor = grid[newY][newX];
-                if (neighbor) {
-                    if (neighbor.type === 'oil') {
-                        grid[newY][newX] = new Particle(newX, newY, 'fire');
-                        particles.push(grid[newY][newX]);
-                    } else if (neighbor.type === 'sand') {
-                        grid[newY][newX] = new Particle(newX, newY, 'glass');
-                        particles.push(grid[newY][newX]);
-                    }
+                if (neighbor && (neighbor.type === 'oil' || neighbor.type === 'wood')) {
+                    grid[newY][newX] = new Particle(newX, newY, 'fire');
+                    particles.push(grid[newY][newX]);
                 }
             }
         }
     }
 
     burn() {
-        if (this.y < height - 1) {
-            const below = grid[this.y + 1][this.x];
-            if (below) {
-                if (below.type === 'oil') {
-                    grid[this.y + 1][this.x] = new Particle(this.x, this.y + 1, 'fire');
-                    particles.push(grid[this.y + 1][this.x]);
-                } else if (below.type === 'sand') {
-                    grid[this.y + 1][this.x] = new Particle(this.x, this.y + 1, 'glass');
-                    particles.push(grid[this.y + 1][this.x]);
-                } else if (below.type === 'water') {
-                    grid[this.y + 1][this.x] = new Particle(this.x, this.y + 1, 'steam');
-                    particles.push(grid[this.y + 1][this.x]);
+        const burnDirections = [
+            { dx: 0, dy: 1 },  // down
+            { dx: 0, dy: -1 }, // up
+            { dx: 1, dy: 0 },  // right
+            { dx: -1, dy: 0 }  // left
+        ];
+
+        for (let dir of burnDirections) {
+            const newX = this.x + dir.dx;
+            const newY = this.y + dir.dy;
+            if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
+                const neighbor = grid[newY][newX];
+                if (neighbor) {
+                    switch (neighbor.type) {
+                        case 'oil':
+                            grid[newY][newX] = new Particle(newX, newY, 'fire');
+                            particles.push(grid[newY][newX]);
+                            break;
+                        case 'sand':
+                            grid[newY][newX] = new Particle(newX, newY, 'glass');
+                            particles.push(grid[newY][newX]);
+                            break;
+                        case 'water':
+                            grid[newY][newX] = new Particle(newX, newY, 'steam');
+                            particles.push(grid[newY][newX]);
+                            break;
+                    }
                 }
             }
+        }
+    }
+
+    extinguish() {
+        grid[this.y][this.x] = null;
+        particles.splice(particles.indexOf(this), 1);
+        if (Math.random() < 0.1) {  // 10% chance to leave a smoke particle
+            const smoke = new Particle(this.x, this.y, 'smoke');
+            particles.push(smoke);
+            grid[this.y][this.x] = smoke;
         }
     }
 
@@ -245,6 +261,7 @@ function loadState() {
     if (savedParticles) {
         savedParticles.forEach(p => {
             const particle = new Particle(p.x, p.y, p.type);
+            particle.life = p.life;
             particles.push(particle);
             grid[p.y][p.x] = particle;
         });
@@ -253,23 +270,31 @@ function loadState() {
 
 let simulationSpeed = 1;
 
-function setSimulationSpeed(speed) {
-    simulationSpeed = speed;
+function setSimulationSpeed(value) {
+    simulationSpeed = value;
 }
 
-function gameLoop() {
+function update() {
     if (simulationRunning) {
-        ctx.clearRect(0, 0, width, height);
-        for (let i = 0; i < simulationSpeed; i++) {
-            particles.forEach(particle => {
-                particle.update();
-            });
+        for (let i = 0; i < particles.length; i++) {
+            particles[i].update();
         }
-        particles.forEach(particle => {
-            particle.draw();
-        });
     }
-    requestAnimationFrame(gameLoop);
 }
 
-gameLoop();
+function draw() {
+    ctx.clearRect(0, 0, width, height);
+    for (let i = 0; i < particles.length; i++) {
+        particles[i].draw();
+    }
+}
+
+function loop() {
+    for (let i = 0; i < simulationSpeed; i++) {
+        update();
+    }
+    draw();
+    requestAnimationFrame(loop);
+}
+
+loop();
