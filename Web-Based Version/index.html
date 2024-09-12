@@ -17,29 +17,52 @@
             display: inline-block;
             vertical-align: middle;
         }
+        .button {
+            margin-right: 5px;
+        }
+        #speedControl {
+            vertical-align: middle;
+        }
+        #infoPanel {
+            margin-top: 10px;
+            font-family: Arial, sans-serif;
+        }
     </style>
 </head>
 <body>
     <div id="toolbar">
-        <button onclick="selectType('sand')">Sand</button>
-        <button onclick="selectType('water')">Water</button>
-        <button onclick="selectType('fire')">Fire</button>
-        <button onclick="selectType('oil')">Oil</button>
-        <button onclick="selectType('wall')">Wall</button>
-        <button onclick="selectType('acid')">Acid</button>
-        <button onclick="selectType('gas')">Gas</button>
-        <button onclick="selectType('smoke')">Smoke</button>
-        <button onclick="selectType('glass')">Glass</button>
+        <button class="button" onclick="selectType('sand')">Sand</button>
+        <button class="button" onclick="selectType('water')">Water</button>
+        <button class="button" onclick="selectType('fire')">Fire</button>
+        <button class="button" onclick="selectType('oil')">Oil</button>
+        <button class="button" onclick="selectType('wall')">Wall</button>
+        <button class="button" onclick="selectType('acid')">Acid</button>
+        <button class="button" onclick="selectType('gas')">Gas</button>
+        <button class="button" onclick="selectType('smoke')">Smoke</button>
+        <button class="button" onclick="selectType('glass')">Glass</button>
+        <button class="button" onclick="createExplosion()">Explosion</button>
         <div id="colorIndicator"></div>
-        <button onclick="startSimulation()">Start</button>
-        <button onclick="pauseSimulation()">Pause</button>
-        <button onclick="clearSimulation()">Clear</button>
-        <button onclick="saveState()">Save</button>
-        <button onclick="loadState()">Load</button>
+        <button class="button" onclick="startSimulation()">Start</button>
+        <button class="button" onclick="pauseSimulation()">Pause</button>
+        <button class="button" onclick="clearSimulation()">Clear</button>
+        <button class="button" onclick="saveState()">Save</button>
+        <button class="button" onclick="loadState()">Load</button>
         <label for="speedControl">Speed:</label>
         <input type="range" id="speedControl" min="1" max="10" value="1" oninput="setSimulationSpeed(this.value)">
     </div>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="infoPanel">
+        <h3>Particle Properties</h3>
+        <p><strong>Sand:</strong> Falls downwards.</p>
+        <p><strong>Water:</strong> Flows downwards and spreads.</p>
+        <p><strong>Fire:</strong> Burns and creates smoke, can ignite other materials.</p>
+        <p><strong>Oil:</strong> Floats on water and can cause explosions.</p>
+        <p><strong>Acid:</strong> Corrodes metals and interacts with other materials.</p>
+        <p><strong>Glass:</strong> Replaces sand when heated.</p>
+        <p><strong>Smoke:</strong> Rises and spreads.</p>
+        <p><strong>Gas:</strong> Rises and spreads quickly.</p>
+        <p><strong>Steam:</strong> Produced by heating water.</p>
+    </div>
     <script src="app.js"></script>
 </body>
 </html>

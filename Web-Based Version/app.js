@@ -143,7 +143,7 @@ class Particle {
             { dx: 1, dy: 0 },
             { dx: -1, dy: 0 }
         ];
-
+    
         for (let dir of burnDirections) {
             const newX = this.x + dir.dx;
             const newY = this.y + dir.dy;
@@ -151,23 +151,25 @@ class Particle {
                 const neighbor = grid[newY][newX];
                 if (neighbor) {
                     switch (neighbor.type) {
-                        case 'oil':
+                        case 'wood':  // Wood turns into fire
                             grid[newY][newX] = new Particle(newX, newY, 'fire');
                             particles.push(grid[newY][newX]);
                             break;
-                        case 'sand':
-                            grid[newY][newX] = new Particle(newX, newY, 'glass');
-                            particles.push(grid[newY][newX]);
+                        case 'oil':  // Oil causes explosion
+                            grid[newY][newX] = null;  // Remove oil
+                            createExplosion(newX, newY);  // Explosion function
                             break;
-                        case 'water':
+                        case 'water':  // Water extinguishes fire, turns into steam
                             grid[newY][newX] = new Particle(newX, newY, 'steam');
                             particles.push(grid[newY][newX]);
+                            this.extinguish();  // Fire particle extinguishes
                             break;
                     }
                 }
             }
         }
     }
+    
 
     flicker() {
         const flickerDirections = [
@@ -185,6 +187,26 @@ class Particle {
             this.x = newX;
             this.y = newY;
             grid[this.y][this.x] = this;
+        }
+    }
+
+    corrode() {
+        const corrodeDirections = [
+            { dx: 0, dy: 1 },
+            { dx: 0, dy: -1 },
+            { dx: 1, dy: 0 },
+            { dx: -1, dy: 0 }
+        ];
+    
+        for (let dir of corrodeDirections) {
+            const newX = this.x + dir.dx;
+            const newY = this.y + dir.dy;
+            if (newX >= 0 && newX < width / particleSize && newY >= 0 && newY < height / particleSize) {
+                const neighbor = grid[newY][newX];
+                if (neighbor && neighbor.type === 'metal') {
+                    grid[newY][newX] = null;  // Metal dissolves
+                }
+            }
         }
     }
 
@@ -211,6 +233,22 @@ function addParticle(x, y, type) {
         const particle = new Particle(gridX, gridY, type);
         particles.push(particle);
         grid[gridY][gridX] = particle;
+    }
+}
+
+function createExplosion(x, y) {
+    const explosionRadius = 3;  // Adjust explosion size
+
+    for (let dx = -explosionRadius; dx <= explosionRadius; dx++) {
+        for (let dy = -explosionRadius; dy <= explosionRadius; dy++) {
+            if (Math.sqrt(dx * dx + dy * dy) <= explosionRadius) {
+                const newX = x + dx;
+                const newY = y + dy;
+                if (newX >= 0 && newX < width / particleSize && newY >= 0 && newY < height / particleSize) {
+                    grid[newY][newX] = null;  // Remove particles within explosion
+                }
+            }
+        }
     }
 }
 
