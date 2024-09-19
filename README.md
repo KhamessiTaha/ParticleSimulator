@@ -2,7 +2,7 @@
 
 A particle simulation game with various elements such as powder, water, fire, steam, and wood. Users can create particles and interact with them in a physics-based environment.                 
    
-## Features                       
+## Features                           
               
 - Powder, Water, Fire, Steam, and Wood elements
 - Physics-based interactions           
