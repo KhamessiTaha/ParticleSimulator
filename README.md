@@ -7,7 +7,7 @@ A particle simulation game with various elements such as powder, water, fire, st
 - Powder, Water, Fire, Steam, and Wood elements
 - Physics-based interactions           
 - Element creation through a user interface
-
+    
 ## Requirements
 
 - Python 3.7+
